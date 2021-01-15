@@ -670,6 +670,8 @@ commands:
                 echo "Current deployments: $DEPLOYMENTS"
                 if [ "$NUM_DEPLOYMENTS" = "1" ] && [ "$TARGET_REVISION" = "<< parameters.task-definition-arn >>" ]; then
                     echo "The task definition revision $TARGET_REVISION is the only deployment for the service and has attained the desired running task count."
+                    #Send Slack Notification
+                    curl -X POST -H 'Content-type: application/json' --data '{"text":"SUCCESS! Deployment of Commit: '"{$CIRCLE_SHA1}"' of '"{$CIRCLE_REPOSITORY_URL}"' has been deployed to ECS!"}' https://hooks.slack.com/services/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
                     exit 0
                 else
                     echo "Waiting for revision << parameters.task-definition-arn >> to reach desired running count / older revisions to be stopped.."
@@ -678,6 +680,7 @@ commands:
                 attempt=$((attempt + 1))
             done
             echo "Stopped waiting for deployment to be stable - please check the status of << parameters.task-definition-arn >> on the AWS ECS console."
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"FAILED! Deployment of Commit: '"{$CIRCLE_SHA1}"' of '"{$CIRCLE_REPOSITORY_URL}"' has failed! Stopped waiting for deployment to be stable - please check the status of << parameters.task-definition-arn >> on the AWS ECS console."}' https://hooks.slack.com/services/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
             <<# parameters.fail-on-verification-timeout >>exit 1<</ parameters.fail-on-verification-timeout >>
 
   update-task-definition:
